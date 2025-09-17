@@ -1,0 +1,35 @@
+# Version de la syntaxe du fichier Docker Compose
+version: '3.8'
+
+# Définition des services (conteneurs) à exécuter
+services:
+  # Nom de notre service de base de données
+  postgres:
+    # Utilisation de l'image officielle PostgreSQL, version 15
+    image: postgres:15
+
+    # Nom personnalisé pour le conteneur pour une identification facile
+    container_name: duc_db_container
+
+    # Politique de redémarrage : le conteneur redémarrera automatiquement
+    restart: always
+
+    # Configuration des variables d'environnement pour initialiser la base de données
+    # Ces valeurs correspondent à votre DATABASE_URL
+    environment:
+      POSTGRES_USER: duc
+      POSTGRES_PASSWORD: duc12345
+      POSTGRES_DB: duc_db
+
+    # Mappage des ports : le port 5432 de votre machine est lié au port 5432 du conteneur
+    ports:
+      - "5432:5432"
+
+    # Persistance des données : les données de la BDD seront stockées dans un volume
+    # nommé 'postgres-data', garantissant qu'elles persistent même si le conteneur est supprimé.
+    volumes:
+      - postgres-data-duc:/var/lib/postgresql/data
+
+# Déclaration du volume nommé pour la persistance des données
+volumes:
+  postgres-data-duc:

@@ -1,46 +1,56 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { Event } from './entities/event.entity';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Event } from '@prisma/client';
 
 @Injectable()
 export class EventsService {
-  constructor(
-    @InjectRepository(Event)
-    private readonly eventsRepository: Repository<Event>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   create(createEventDto: CreateEventDto): Promise<Event> {
-    const event = this.eventsRepository.create(createEventDto);
-    return this.eventsRepository.save(event);
+    return this.prisma.event.create({
+      data: createEventDto,
+    });
   }
 
   findAll(): Promise<Event[]> {
-    return this.eventsRepository.find({ order: { startDate: 'DESC' } });
+    return this.prisma.event.findMany({
+      orderBy: {
+        startDate: 'desc',
+      },
+    });
   }
 
   async findOne(id: string): Promise<Event> {
-    const event = await this.eventsRepository.findOneBy({ id });
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+    });
+
     if (!event) {
-      throw new NotFoundException(`Event with ID ${id} not found`);
+      throw new NotFoundException(`Event with ID "${id}" not found`);
     }
     return event;
   }
 
   async update(id: string, updateEventDto: UpdateEventDto): Promise<Event> {
-    const result = await this.eventsRepository.update(id, updateEventDto);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Event with ID ${id} not found`);
+    try {
+      return await this.prisma.event.update({
+        where: { id },
+        data: updateEventDto,
+      });
+    } catch (error) {
+      throw new NotFoundException(`Event with ID "${id}" not found`);
     }
-    return this.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
-    const result = await this.eventsRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Event with ID ${id} not found`);
+  async remove(id: string): Promise<Event> {
+    try {
+      return await this.prisma.event.delete({
+        where: { id },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Event with ID "${id}" not found`);
     }
   }
 }

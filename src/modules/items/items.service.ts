@@ -1,95 +1,151 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-import { Item } from './entities/item.entity';
-import { ItemVariant } from './entities/item-variant.entity';
-import { ItemImage } from './entities/item-image.entity';
-import { ItemOption } from './entities/item-option.entity';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Item } from '@prisma/client';
 
 @Injectable()
 export class ItemsService {
-  constructor(
-    @InjectRepository(Item)
-    private readonly itemsRepository: Repository<Item>,
-    private readonly dataSource: DataSource, // Injecter DataSource pour les transactions
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
+  /**
+   * Crée un nouvel item avec ses relations (variantes, images, options)
+   * en une seule transaction atomique grâce aux "nested writes" de Prisma.
+   */
   async create(createItemDto: CreateItemDto): Promise<Item> {
-    const { variants = [], images = [], options = [], ...itemData } = createItemDto;
+    const { categoryId, variants = [], images = [], options = [], ...itemData } = createItemDto;
 
-    // Utilisation d'une transaction pour s'assurer que tout est créé ou rien n'est créé
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      // 1. Créer l'item principal
-      const item = queryRunner.manager.create(Item, itemData);
-      const savedItem = await queryRunner.manager.save(item);
-
-      // 2. Créer les entités associées
-      if (variants.length > 0) {
-        const itemVariants = variants.map(v => queryRunner.manager.create(ItemVariant, { ...v, item: savedItem }));
-        await queryRunner.manager.save(itemVariants);
-      }
-      if (images.length > 0) {
-        const itemImages = images.map(i => queryRunner.manager.create(ItemImage, { ...i, item: savedItem }));
-        await queryRunner.manager.save(itemImages);
-      }
-      if (options.length > 0) {
-        const itemOptions = options.map(o => queryRunner.manager.create(ItemOption, { ...o, item: savedItem }));
-        await queryRunner.manager.save(itemOptions);
-      }
-
-      await queryRunner.commitTransaction();
-      return this.findOne(savedItem.id); // On recharge l'item avec toutes ses relations
-
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err; // Propage l'erreur
-    } finally {
-      await queryRunner.release();
-    }
+    return this.prisma.item.create({
+      data: {
+        ...itemData,
+        // Connexion à une catégorie existante via son ID
+        category: {
+          connect: { id: categoryId },
+        },
+        // Création des relations en même temps
+        variants: {
+          create: variants.map(variant => ({
+            variantName: variant.variantName,
+            price: variant.price,
+            sku: variant.sku,
+          })),
+        },
+        images: {
+          create: images.map(image => ({
+            imageUrl: image.imageUrl,
+            isDefault: image.isDefault,
+          })),
+        },
+        options: {
+          create: options.map(option => ({
+            optionName: option.optionName,
+            optionType: option.optionType,
+          })),
+        },
+      },
+      // Inclure toutes les relations dans l'objet retourné
+      include: {
+        category: true,
+        variants: true,
+        images: true,
+        options: true,
+      },
+    });
   }
 
+  /**
+   * Récupère tous les items avec leurs relations.
+   */
   findAll(): Promise<Item[]> {
-    return this.itemsRepository.find({
-      relations: ['category', 'variants', 'images', 'options'],
+    return this.prisma.item.findMany({
+      include: {
+        category: true,
+        variants: true,
+        images: true,
+        options: true,
+      },
     });
   }
 
+  /**
+   * Récupère un item spécifique par son ID avec ses relations.
+   */
   async findOne(id: string): Promise<Item> {
-    const item = await this.itemsRepository.findOne({
+    const item = await this.prisma.item.findUnique({
       where: { id },
-      relations: ['category', 'variants', 'images', 'options'],
+      include: {
+        category: true,
+        variants: true,
+        images: true,
+        options: true,
+      },
     });
+
     if (!item) {
-      throw new NotFoundException(`Item with ID ${id} not found`);
+      throw new NotFoundException(`Item with ID "${id}" not found`);
     }
     return item;
   }
 
-  // L'update est aussi une opération complexe qui devrait utiliser une transaction
-  // Pour la simplicité, cette version met à jour l'item principal seulement.
-  // Une version complète supprimerait les anciennes relations et créerait les nouvelles.
+  /**
+   * Met à jour un item et ses relations.
+   * Cette approche met à jour les données de base de l'item
+   * et remplace complètement ses relations (variantes, images, options).
+   */
   async update(id: string, updateItemDto: UpdateItemDto): Promise<Item> {
-    const { variants, images, options, ...itemData } = updateItemDto;
-    // On pourrait implémenter une logique de transaction similaire à 'create' ici.
-    const result = await this.itemsRepository.update(id, itemData);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Item with ID ${id} not found`);
+    const { categoryId, variants, images, options, ...itemData } = updateItemDto;
+
+    try {
+      return await this.prisma.item.update({
+        where: { id },
+        data: {
+          ...itemData,
+          // Reconnecter la catégorie si elle est fournie
+          ...(categoryId && { category: { connect: { id: categoryId } } }),
+          // Remplacer complètement les anciennes relations par les nouvelles
+          ...(variants && {
+            variants: {
+              deleteMany: {}, // Supprime toutes les anciennes variantes
+              create: variants, // Crée les nouvelles
+            },
+          }),
+          ...(images && {
+            images: {
+              deleteMany: {},
+              create: images,
+            },
+          }),
+          ...(options && {
+            options: {
+              deleteMany: {},
+              create: options,
+            },
+          }),
+        },
+        include: {
+          category: true,
+          variants: true,
+          images: true,
+          options: true,
+        },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Item with ID "${id}" not found or update failed`);
     }
-    return this.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
-    // Grâce à 'onDelete: CASCADE', TypeORM supprimera automatiquement
-    // les variants, images, et options associés à cet item.
-    const result = await this.itemsRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Item with ID ${id} not found`);
+  /**
+   * Supprime un item par son ID.
+   * Grâce à `onDelete: Cascade` dans le schema.prisma,
+   * Prisma supprimera automatiquement les variantes, images et options associées.
+   */
+  async remove(id: string): Promise<Item> {
+    try {
+      return await this.prisma.item.delete({
+        where: { id },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Item with ID "${id}" not found`);
     }
   }
 }

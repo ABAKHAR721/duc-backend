@@ -1,38 +1,54 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
-import { Business } from './entities/business.entity';
-
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Business } from '@prisma/client'; // <-- LA CORRECTION EST ICI
 
 @Injectable()
 export class BusinessService {
-  constructor(
-    @InjectRepository(Business)
-    private readonly businessRepository: Repository<Business>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  create(createBusinessDto: CreateBusinessDto) {
-    const business = this.businessRepository.create(createBusinessDto);
-    return this.businessRepository.save(business);
+  create(createBusinessDto: CreateBusinessDto): Promise<Business> {
+    return this.prisma.business.create({
+      data: createBusinessDto,
+    });
   }
 
-  findAll() {
-    return this.businessRepository.find();
+  findAll(): Promise<Business[]> {
+    return this.prisma.business.findMany();
   }
 
-  findOne(id: string) {
-    return this.businessRepository.findOneBy({ id });
+  async findOne(id: string): Promise<Business> {
+    const business = await this.prisma.business.findUnique({
+      where: { id },
+    });
+
+    if (!business) {
+      throw new NotFoundException(`Business information with ID "${id}" not found`);
+    }
+
+    return business;
   }
 
-  async update(id: string, updateBusinessDto: UpdateBusinessDto) {
-    await this.businessRepository.update(id, updateBusinessDto);
-    return this.findOne(id);
+  async update(id: string, updateBusinessDto: UpdateBusinessDto): Promise<Business> {
+    try {
+      return await this.prisma.business.update({
+        where: { id },
+        data: updateBusinessDto,
+      });
+    } catch (error) {
+      throw new NotFoundException(`Business information with ID "${id}" not found`);
+    }
   }
 
-  remove(id: string) {
-    return this.businessRepository.delete(id);
+  async remove(id: string): Promise<Business> {
+    try {
+      return await this.prisma.business.delete({
+        where: { id },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Business information with ID "${id}" not found`);
+    }
   }
 }
-// > Note : Nous n'avons pas encore défini les DTOs, mais le code fonctionnera. Nous y reviendrons pour la validation.

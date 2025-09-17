@@ -1,56 +1,83 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Category } from '@prisma/client';
 
 @Injectable()
 export class CategoriesService {
-  constructor(
-    @InjectRepository(Category)
-    private readonly categoriesRepository: Repository<Category>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
+  /**
+   * Crée une nouvelle catégorie.
+   */
   create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    const category = this.categoriesRepository.create(createCategoryDto);
-    return this.categoriesRepository.save(category);
+    return this.prisma.category.create({
+      data: createCategoryDto,
+    });
   }
 
-  // Retourne les catégories de premier niveau avec leurs enfants directs
+  /**
+   * Retourne toutes les catégories de premier niveau (racines)
+   * avec leurs enfants directs (sous-catégories).
+   */
   findAll(): Promise<Category[]> {
-    return this.categoriesRepository.find({
-      where: { parentId: IsNull() }, // Ne prend que les catégories racines
-      relations: ['children'], // Charge les sous-catégories
-      order: { displayOrder: 'ASC' },
+    return this.prisma.category.findMany({
+      where: { parentId: null }, // Filtre pour ne prendre que les catégories sans parent
+      include: {
+        children: true, // Inclut les sous-catégories
+      },
+      orderBy: {
+        displayOrder: 'asc', // Trie par ordre d'affichage
+      },
     });
   }
 
+  /**
+   * Récupère une catégorie spécifique par son ID,
+   * avec ses enfants (sous-catégories) et les articles qu'elle contient.
+   */
   async findOne(id: string): Promise<Category> {
-    const category = await this.categoriesRepository.findOne({
+    const category = await this.prisma.category.findUnique({
       where: { id },
-      relations: ['children', 'items'], // Charge les enfants et les articles associés
+      include: {
+        children: true, // Inclut les sous-catégories
+        items: true, // Inclut les articles de cette catégorie
+      },
     });
+
     if (!category) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
+      throw new NotFoundException(`Category with ID "${id}" not found`);
     }
     return category;
   }
 
+  /**
+   * Met à jour une catégorie par son ID.
+   */
   async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
-    const result = await this.categoriesRepository.update(id, updateCategoryDto);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
+    try {
+      return await this.prisma.category.update({
+        where: { id },
+        data: updateCategoryDto,
+      });
+    } catch (error) {
+      throw new NotFoundException(`Category with ID "${id}" not found`);
     }
-    return this.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
-    // Note: la contrainte ON DELETE SET NULL dans l'entité
-    // fera que les enfants de la catégorie supprimée deviendront des catégories racines.
-    const result = await this.categoriesRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
+  /**
+   * Supprime une catégorie par son ID.
+   * La contrainte `onDelete: SetNull` dans schema.prisma
+   * mettra automatiquement à jour le `parentId` des enfants à `null`.
+   */
+  async remove(id: string): Promise<Category> {
+    try {
+      return await this.prisma.category.delete({
+        where: { id },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Category with ID "${id}" not found`);
     }
   }
 }

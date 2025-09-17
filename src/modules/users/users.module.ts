@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
+
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [PrismaModule], // Assurez-vous que Prisma est disponible
   controllers: [UsersController],
   providers: [UsersService],
-  exports: [UsersService], // Nous exportons le service pour l'utiliser dans le module d'authentification plus tard
+  exports: [UsersService],// Nous exportons le service pour l'utiliser dans le module d'authentification plus tard
 })
 export class UsersModule {}

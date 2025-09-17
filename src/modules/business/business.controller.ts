@@ -6,13 +6,13 @@ import { UpdateBusinessDto } from './dto/update-business.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Business Management')
-@ApiBearerAuth()
-@Controller('business')
-@UseGuards(AuthGuard('jwt')) 
+@Controller('business') 
 export class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Create business', 
     description: 'Create a new business with company information and settings' 
@@ -50,6 +50,8 @@ export class BusinessController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Update business', 
     description: 'Update an existing business information' 
@@ -65,6 +67,8 @@ export class BusinessController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Delete business', 
     description: 'Delete a business by its ID' 

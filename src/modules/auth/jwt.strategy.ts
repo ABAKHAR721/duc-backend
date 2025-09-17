@@ -1,4 +1,3 @@
-
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -13,7 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     const jwtSecret = configService.get<string>('JWT_SECRET');
     if (!jwtSecret) {
-      throw new Error('JWT_SECRET is not defined in environment variables');
+      throw new Error('JWT_SECRET is not configured');
     }
     
     super({
@@ -29,14 +28,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * Ce que cette méthode retourne sera attaché à l'objet `request.user`.
    */
   async validate(payload: { sub: string; email: string; role: string }) {
+    // La méthode findOne retourne maintenant un utilisateur SANS le mot de passe.
     const user = await this.usersService.findOne(payload.sub);
 
     if (!user) {
       throw new UnauthorizedException('User not found or token invalid.');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user;
-    return result; // Attache l'utilisateur (sans mdp) à la requête
+    // LA CORRECTION EST ICI :
+    // Puisque 'user' ne contient plus la propriété 'password',
+    // nous pouvons le retourner directement.
+    return user;
   }
 }

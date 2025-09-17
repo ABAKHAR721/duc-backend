@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Categories')
 @Controller('categories')
@@ -10,6 +11,8 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Create category', 
     description: 'Create a new category for organizing items' 
@@ -44,6 +47,8 @@ export class CategoriesController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Update category', 
     description: 'Update an existing category information' 
@@ -58,6 +63,8 @@ export class CategoriesController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Delete category', 
     description: 'Delete a category by its ID' 

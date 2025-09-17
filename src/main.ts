@@ -2,10 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common'; // Importez ValidationPipe
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'; // <-- Importez Swagger
+import { PrismaService } from './prisma/prisma.service';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  const prismaService = app.get(PrismaService); // Récupérer le service
+  await prismaService.enableShutdownHooks(app); // Activer les hooks
 
   // Activer la validation globale
   app.useGlobalPipes(new ValidationPipe({

@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { ItemsService } from './items.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Items')
 @Controller('items')
@@ -10,6 +11,8 @@ export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Create item', 
     description: 'Create a new item with variants, images, and options' 
@@ -44,6 +47,8 @@ export class ItemsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Update item', 
     description: 'Update an existing item and its related data' 
@@ -58,6 +63,8 @@ export class ItemsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Delete item', 
     description: 'Delete an item by its ID along with all related data' 

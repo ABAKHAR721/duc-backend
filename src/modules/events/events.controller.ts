@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Events')
 @Controller('events')
@@ -10,6 +11,8 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Create event', 
     description: 'Create a new event with dates and details' 
@@ -44,6 +47,8 @@ export class EventsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Update event', 
     description: 'Update an existing event information' 
@@ -58,6 +63,8 @@ export class EventsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Delete event', 
     description: 'Delete an event by its ID' 

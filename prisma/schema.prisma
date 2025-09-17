@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =================================================================================
+// TRADUCTION DE VOS ENTITÉS
+// =================================================================================
+
+model Business {
+  id              String    @id @default(uuid())
+  name            String
+  logoUrl         String?   @map("logo_url")
+  faviconUrl      String?   @map("favicon_url")
+  email           String?
+  phone           String?
+  address         String?
+  description     String?
+  currency        String    @default("EUR")
+  slogan          String?
+  hours           String?
+  urlFacebook     String?   @map("url_facebook")
+  urlInstagram    String?   @map("url_instagram")
+  urlLinkedin     String?   @map("url_linkedin")
+  uberEatsUrl     String?   @map("uber_eats_url")
+  googleMapsUrl   String?   @map("google_maps_url")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("business")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  password  String
+  role      String
+  status    String   @default("Active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Event {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  imageUrl    String?   @map("image_url")
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+  status      String    @default("En cours")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("events")
+}
+
+model Category {
+  id           String     @id @default(uuid())
+  name         String
+  description  String?
+  displayOrder Int        @default(0) @map("display_order")
+  imageUrl     String?    @map("image_url")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  items    Item[]
+  parentId String?    @map("parent_id")
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+
+  @@map("categories")
+}
+
+model Item {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  status      String    @default("Active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  variants   ItemVariant[]
+  images     ItemImage[]
+  options    ItemOption[]
+
+  @@map("items")
+}
+
+model ItemVariant {
+  id          String @id @default(uuid())
+  variantName String @map("variant_name")
+  price       Float
+  sku         String?
+
+  // Relation
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId String @map("item_id")
+
+  @@map("item_variants")
+}
+
+model ItemImage {
+  id        String  @id @default(uuid())
+  imageUrl  String  @map("image_url")
+  isDefault Boolean @default(false) @map("is_default")
+
+  // Relation
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId String @map("item_id")
+
+  @@map("item_images")
+}
+
+model ItemOption {
+  id         String  @id @default(uuid())
+  optionName String  @map("option_name")
+  optionValue String? @map("option_value")
+  optionType String? @map("option_type")
+
+  // Relation
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId String @map("item_id")
+
+  @@map("item_options")
+}

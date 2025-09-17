@@ -1,0 +1,1 @@
+npx prisma migrate dev --name <nom_descriptif_de_la_migration>

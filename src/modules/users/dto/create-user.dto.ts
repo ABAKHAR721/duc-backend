@@ -23,7 +23,7 @@ export class CreateUserDto {
   @ApiProperty({ 
     description: 'User role', 
     example: 'Admin',
-    enum: ['Admin', 'Manager', 'Staff']
+    enum: ['Admin', 'SuperAdmin']
   })
   @IsString()
   @IsNotEmpty()

@@ -4,6 +4,9 @@ import { ItemsService } from './items.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Role } from '../auth/constants/roles.enum';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('Items')
 @Controller('items')
@@ -11,7 +14,8 @@ export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Create item', 
@@ -47,7 +51,8 @@ export class ItemsController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Update item', 
@@ -63,7 +68,8 @@ export class ItemsController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Delete item', 

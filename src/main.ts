@@ -8,6 +8,14 @@ import { PrismaService } from './prisma/prisma.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
+  // Configure CORS for frontend connection
+  app.enableCors({
+    origin: ['http://localhost:3001'], // Frontend URL
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
+  
   const prismaService = app.get(PrismaService); // Récupérer le service
   await prismaService.enableShutdownHooks(app); // Activer les hooks
 

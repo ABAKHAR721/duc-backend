@@ -3,7 +3,10 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiParam } 
 import { BusinessService } from './business.service';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/constants/roles.enum';
 import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiTags('Business Management')
 @Controller('business') 
@@ -11,7 +14,8 @@ export class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.SuperAdmin) 
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Create business', 
@@ -50,7 +54,8 @@ export class BusinessController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin) 
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Update business', 
@@ -67,7 +72,8 @@ export class BusinessController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.SuperAdmin)  
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Delete business', 

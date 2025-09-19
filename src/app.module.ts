@@ -11,6 +11,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { ItemsModule } from './modules/items/items.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SeederModule } from './modules/seeder/seeder.module';
 @Module({
   imports: [
     // 1. Module de configuration pour les variables d'environnement (.env)
@@ -29,6 +30,8 @@ import { PrismaModule } from './prisma/prisma.module';
     CategoriesModule,
     ItemsModule,
     AuthModule,
+    SeederModule,
+    ConfigModule,
   ],
   controllers: [AppController],
   providers: [AppService],

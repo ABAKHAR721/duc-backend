@@ -4,6 +4,9 @@ import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/constants/roles.enum';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiTags('Events')
 @Controller('events')
@@ -11,7 +14,8 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Create event', 
@@ -47,7 +51,8 @@ export class EventsController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Update event', 
@@ -63,7 +68,8 @@ export class EventsController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Delete event', 

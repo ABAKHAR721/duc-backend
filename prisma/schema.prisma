@@ -138,4 +138,4 @@ model ItemOption {
   itemId String @map("item_id")
 
   @@map("item_options")
-}
+} 

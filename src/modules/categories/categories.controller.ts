@@ -3,7 +3,10 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } 
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/constants/roles.enum';
 import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiTags('Categories')
 @Controller('categories')
@@ -11,7 +14,8 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin) 
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Create category', 
@@ -47,7 +51,8 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Update category', 
@@ -63,7 +68,8 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Delete category', 

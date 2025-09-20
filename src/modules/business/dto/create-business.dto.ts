@@ -36,6 +36,12 @@ export class CreateBusinessDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @ApiProperty({ description: 'Currency code', example: 'USD' })
+  @IsString()
+  @IsNotEmpty()
+  currency: string;
+  
   
   @ApiPropertyOptional({ description: 'Business slogan', example: 'Taste the difference' })
   @IsString()

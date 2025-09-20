@@ -10,30 +10,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  @ApiOperation({ 
-    summary: 'User login', 
-    description: 'Authenticate user with email and password to receive JWT token' 
-  })
+  @ApiOperation({ summary: 'User login' })
   @ApiBody({ type: AuthLoginDto })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Login successful',
-    schema: {
-      type: 'object',
-      properties: {
-        access_token: { type: 'string', description: 'JWT access token' },
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'number' },
-            email: { type: 'string' },
-            name: { type: 'string' },
-            role: { type: 'string' }
-          }
-        }
-      }
-    }
-  })
+  @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() authLoginDto: AuthLoginDto) {
     const user = await this.authService.validateUser(authLoginDto);
@@ -42,28 +21,35 @@ export class AuthController {
     }
     return this.authService.login(user);
   }
+
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  async refresh(@Body() body: { refresh_token: string }) {
+    try {
+      return await this.authService.refreshToken(body.refresh_token);
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('logout')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({ status: 200, description: 'Logout successful' })
+  async logout(@Request() req) {
+    await this.authService.logout(req.user.sub);
+    return { message: 'Logout successful' };
+  }
   
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   @ApiBearerAuth()
-  @ApiOperation({ 
-    summary: 'Get user profile', 
-    description: 'Get current authenticated user profile information from JWT token' 
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Profile retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'number' },
-        email: { type: 'string' },
-        name: { type: 'string' },
-        role: { type: 'string' }
-      }
-    }
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing token' })
+  @ApiOperation({ summary: 'Get user profile' })
+  @ApiResponse({ status: 200, description: 'Profile retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   getProfile(@Request() req) {
     return req.user;
   }

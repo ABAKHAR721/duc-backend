@@ -9,7 +9,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
+} 
 
 // =================================================================================
 // TRADUCTION DE VOS ENTITÉS
@@ -39,15 +39,16 @@ model Business {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  phone     String?
-  password  String
-  role      String
-  status    String   @default("Active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  password     String
+  role         String
+  status       String   @default("Active")
+  refreshToken String?  @map("refresh_token")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("users")
 }

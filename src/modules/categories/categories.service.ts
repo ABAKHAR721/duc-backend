@@ -18,17 +18,21 @@ export class CategoriesService {
   }
 
   /**
-   * Retourne toutes les catégories de premier niveau (racines)
-   * avec leurs enfants directs (sous-catégories).
+   * Retourne toutes les catégories avec le nombre d'articles.
    */
   findAll(): Promise<Category[]> {
     return this.prisma.category.findMany({
-      where: { parentId: null }, // Filtre pour ne prendre que les catégories sans parent
       include: {
-        children: true, // Inclut les sous-catégories
+        children: true,
+        parent: true,
+        _count: {
+          select: {
+            items: true
+          }
+        }
       },
       orderBy: {
-        displayOrder: 'asc', // Trie par ordre d'affichage
+        displayOrder: 'asc',
       },
     });
   }
@@ -69,14 +73,35 @@ export class CategoriesService {
   /**
    * Supprime une catégorie par son ID.
    * La contrainte `onDelete: SetNull` dans schema.prisma
-   * mettra automatiquement à jour le `parentId` des enfants à `null`.
+   * mettra automatiquement à jour le `categoryId` des items à `null`
+   * et le `parentId` des enfants à `null`.
    */
   async remove(id: string): Promise<Category> {
     try {
+      // Vérifier d'abord si la catégorie existe et récupérer le nombre d'items
+      const category = await this.prisma.category.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: {
+              items: true
+            }
+          }
+        }
+      });
+
+      if (!category) {
+        throw new NotFoundException(`Category with ID "${id}" not found`);
+      }
+
+      // Supprimer la catégorie (les items auront leur categoryId mis à null automatiquement)
       return await this.prisma.category.delete({
         where: { id },
       });
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new NotFoundException(`Category with ID "${id}" not found`);
     }
   }

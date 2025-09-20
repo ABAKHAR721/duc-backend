@@ -39,6 +39,7 @@ export class ItemsService {
         options: {
           create: options.map(option => ({
             optionName: option.optionName,
+            optionValue: option.optionValue,
             optionType: option.optionType,
           })),
         },
@@ -118,7 +119,11 @@ export class ItemsService {
           ...(options && {
             options: {
               deleteMany: {},
-              create: options,
+              create: options.map(option => ({
+                optionName: option.optionName,
+                optionValue: option.optionValue,
+                optionType: option.optionType,
+              })),
             },
           }),
         },

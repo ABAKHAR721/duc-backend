@@ -36,6 +36,7 @@ export class UsersService {
         phone: true,
         role: true,
         status: true,
+        refreshToken: true,
         createdAt: true,
         updatedAt: true,
       }

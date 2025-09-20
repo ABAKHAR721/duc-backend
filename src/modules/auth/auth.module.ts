@@ -6,10 +6,12 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy'; // Nous allons créer ce fichier
+import { PrismaModule } from '../../prisma/prisma.module';
 
 @Module({
   imports: [
     UsersModule, // Pour accéder à UsersService
+    PrismaModule, // Pour accéder à PrismaService
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

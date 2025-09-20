@@ -28,7 +28,7 @@ export class SeederService implements OnModuleInit {
   private async seedUsers() {
     // --- Seed SuperAdmin ---
     
-    const superAdminEmail = this.configService.get<string>('DEFAULT_SUPER_ADMIN_EMAIL') || '';
+    const superAdminEmail = this.configService.get<string>('DEFAULT_SUPER_ADMIN_EMAIL') || 'superadmin@duc-project.com';
     const existingSuperAdmin = await this.usersService.findOneByEmail(superAdminEmail);
 
     if (!existingSuperAdmin) {

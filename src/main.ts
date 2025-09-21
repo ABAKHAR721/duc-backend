@@ -10,7 +10,7 @@ async function bootstrap() {
   
   // Configure CORS for frontend connection
   app.enableCors({
-    origin: [process.env.FRONTEND_URL || 'http://localhost:3001'],
+    origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -35,9 +35,12 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document); // <-- L'interface Swagger sera disponible sur http://localhost:3000/api
+  SwaggerModule.setup('api', app, document); // <-- L'interface Swagger sera disponible sur http://localhost:3001/api
   // --- Fin de la configuration de Swagger ---
 
-  await app.listen(process.env.PORT ?? 3000);
+  app.setGlobalPrefix('api');
+
+  await app.listen(process.env.PORT ?? 3001, '::');
+  
 }
 bootstrap();

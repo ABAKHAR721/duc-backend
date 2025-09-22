@@ -10,9 +10,9 @@ COPY . .
 RUN npx prisma generate
 # Build the application
 RUN npm run build
-# Remove devDependencies for a slimmer production image
-RUN npm prune --omit=dev
+# Keep devDependencies to retain Prisma CLI for runtime migrations on Railway
+# (If you want a slimmer image, use a multi-stage build instead of pruning here.)
 # Expose port 8080 for Railway
 EXPOSE 8080
 # Start the application
-CMD ["npm", "run", "start:prod"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]

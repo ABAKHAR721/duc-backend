@@ -26,6 +26,9 @@ async function bootstrap() {
     transform: true, // Transforme les types de données (ex: string en number pour les IDs)
   }));
   
+  // Définir le préfixe global AVANT de générer la documentation Swagger
+  app.setGlobalPrefix('api');
+
     // --- Début de la configuration de Swagger ---
   const config = new DocumentBuilder()
     .setTitle('Duc-Backend API')
@@ -37,8 +40,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document); // <-- L'interface Swagger sera disponible sur http://localhost:3001/api
   // --- Fin de la configuration de Swagger ---
-
-  app.setGlobalPrefix('api');
 
   await app.listen(process.env.PORT ?? 3001, '::');
   

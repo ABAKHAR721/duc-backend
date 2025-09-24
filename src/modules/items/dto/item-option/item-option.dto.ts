@@ -11,7 +11,6 @@ export class ItemOptionDto {
   @IsString()
   @IsNotEmpty()
   optionValue: string;
-
   @ApiPropertyOptional({ 
     description: 'Option type', 
     example: 'addon',

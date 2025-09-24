@@ -31,7 +31,7 @@ export class CreateEventDto {
   @IsString()
   @IsOptional()
   status?: string;
-
+ 
   @ApiPropertyOptional({ description: 'Event type', example: 'Online', enum: ['Online', 'Offline'] })
   @IsString()
   eventType: string;

@@ -27,7 +27,7 @@ export class EventsController {
   create(@Body() createEventDto: CreateEventDto) {
     return this.eventsService.create(createEventDto);
   }
-
+ 
   @Get()
   @ApiOperation({ 
     summary: 'Get all events', 
@@ -36,6 +36,16 @@ export class EventsController {
   @ApiResponse({ status: 200, description: 'Events retrieved successfully' })
   findAll() {
     return this.eventsService.findAll();
+  }
+
+  @Get('header')
+  @ApiOperation({ 
+    summary: 'Get all events header', 
+    description: 'Retrieve a list of all events header with their status and dates' 
+  })
+  @ApiResponse({ status: 200, description: 'Events header retrieved successfully' })
+  findAllHeader() {
+    return this.eventsService.findAllHeader();
   }
 
   @Get(':id')

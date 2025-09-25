@@ -22,6 +22,17 @@ export class EventsService {
     });
   }
 
+  findAllHeader(): Promise<Event[]> {
+    return this.prisma.event.findMany({
+      where: {
+        eventType: 'Header',
+      },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+  }
+
   async findOne(id: string): Promise<Event> {
     const event = await this.prisma.event.findUnique({
       where: { id },

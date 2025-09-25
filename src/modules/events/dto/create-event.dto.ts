@@ -1,5 +1,6 @@
-import { IsString, IsNotEmpty, IsOptional, IsUrl, IsDateString } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUrl, IsDateString, ValidateIf } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateEventDto {
   @ApiProperty({ description: 'Event name', example: 'Summer Festival' })
@@ -13,6 +14,8 @@ export class CreateEventDto {
   description?: string;
 
   @ApiPropertyOptional({ description: 'Event image URL', example: 'https://example.com/event.jpg' })
+  @Transform(({ value }) => value === '' ? undefined : value)
+  @ValidateIf((o) => o.imageUrl && o.imageUrl.trim() !== '')
   @IsUrl()
   @IsOptional()
   imageUrl?: string;
@@ -32,7 +35,9 @@ export class CreateEventDto {
   @IsOptional()
   status?: string;
  
-  @ApiPropertyOptional({ description: 'Event type', example: 'Online', enum: ['Online', 'Offline'] })
+  @ApiPropertyOptional({ description: 'Event type', example: 'Online' })
+  @Transform(({ value }) => value === '' ? undefined : value)
   @IsString()
-  eventType: string;
+  @IsOptional()
+  eventType?: string;
 }

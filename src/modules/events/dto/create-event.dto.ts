@@ -23,7 +23,7 @@ export class CreateEventDto {
   @ApiPropertyOptional({ description: 'Event start date', example: '2024-06-01T10:00:00Z' })
   @IsDateString()
   @IsOptional()
-  startDate?: Date;
+  startDate?: Date; 
 
   @ApiPropertyOptional({ description: 'Event end date', example: '2024-06-01T18:00:00Z' })
   @IsDateString()

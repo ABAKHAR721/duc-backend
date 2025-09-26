@@ -83,7 +83,7 @@ export class ItemsController {
   }
 
   @Get('category/:categoryName')
-  @ApiOperation({ 
+  @ApiOperation({  
     summary: 'Get items by category name', 
     description: 'Retrieve all items belonging to a specific category by category name' 
   })

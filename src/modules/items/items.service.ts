@@ -149,4 +149,25 @@ export class ItemsService {
       throw new NotFoundException(`Item with ID "${id}" not found`);
     }
   }
+
+  /**
+   * Récupère tous les items d'une catégorie spécifique par nom de catégorie.
+   */
+  async findByCategory(categoryName: string): Promise<Item[]> {
+    const items = await this.prisma.item.findMany({
+      where: {
+        category: {
+          name: categoryName,
+        },
+      },
+      include: {
+        category: true,
+        variants: true,
+        images: true,
+        options: true,
+      },
+    });
+
+    return items;
+  }
 }

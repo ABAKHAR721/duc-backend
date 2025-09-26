@@ -81,4 +81,16 @@ export class ItemsController {
   remove(@Param('id') id: string) {
     return this.itemsService.remove(id);
   }
+
+  @Get('category/:categoryName')
+  @ApiOperation({ 
+    summary: 'Get items by category name', 
+    description: 'Retrieve all items belonging to a specific category by category name' 
+  })
+  @ApiParam({ name: 'categoryName', description: 'Category name', type: 'string' })
+  @ApiResponse({ status: 200, description: 'Items retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  findByCategory(@Param('categoryName') categoryName: string) {
+    return this.itemsService.findByCategory(categoryName);
+  }
 }

@@ -1,22 +1,16 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, ValidateIf } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ItemOptionDto {
-  @ApiProperty({ description: 'Option name', example: 'Extra Cheese' })
+  @ApiProperty({ description: 'Option type', example: 'VEGETARIENNE,ALLERGENES,BASE' })
   @IsString()
   @IsNotEmpty()
-  optionName: string;
-
-  @ApiProperty({ description: 'Option value', example: 'value ' })
-  @IsString()
-  @IsNotEmpty()
-  optionValue: string;
-  @ApiPropertyOptional({ 
-    description: 'Option type', 
-    example: 'addon',
-    enum: ['addon', 'modifier', 'choice']
+  optionType: string;
+  
+  @ApiProperty({  
+    description: 'Option value', 
+    example: 'VEGETARIENNE oui ou non,ALLERGENES ["Lait", "Soja"],BASE "Tomate ou bien Crème"'
   })
-  @IsString()
   @IsOptional()
-  optionType?: string;
+  optionValue?: string[];
 }

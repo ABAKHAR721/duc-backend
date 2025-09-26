@@ -38,8 +38,7 @@ export class ItemsService {
         },
         options: {
           create: options.map(option => ({
-            optionName: option.optionName,
-            optionValue: option.optionValue,
+            optionValue: JSON.stringify(option.optionValue), // Convert to string for database
             optionType: option.optionType,
           })),
         },
@@ -47,7 +46,6 @@ export class ItemsService {
       // Inclure toutes les relations dans l'objet retourné
       include: {
         category: true,
-        variants: true,
         images: true,
         options: true,
       },
@@ -120,8 +118,7 @@ export class ItemsService {
             options: {
               deleteMany: {},
               create: options.map(option => ({
-                optionName: option.optionName,
-                optionValue: option.optionValue,
+                optionValue: JSON.stringify(option.optionValue), // Convert to string for database
                 optionType: option.optionType,
               })),
             },
@@ -129,7 +126,6 @@ export class ItemsService {
         },
         include: {
           category: true,
-          variants: true,
           images: true,
           options: true,
         },

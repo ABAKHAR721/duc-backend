@@ -131,9 +131,8 @@ model ItemImage {
 
 model ItemOption {
   id         String  @id @default(uuid())
-  optionName String  @map("option_name")
   optionValue String? @map("option_value")
-  optionType String? @map("option_type")
+  optionType String @map("option_type")
 
   // Relation
   item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)

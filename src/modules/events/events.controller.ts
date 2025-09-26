@@ -48,6 +48,16 @@ export class EventsController {
     return this.eventsService.findAllHeader();
   }
 
+  @Get('promo')
+  @ApiOperation({ 
+    summary: 'Get promotional events', 
+    description: 'Retrieve all active promotional events for marketing display' 
+  })
+  @ApiResponse({ status: 200, description: 'Promotional events retrieved successfully' })
+  findPromoEvents() {
+    return this.eventsService.findPromoEvents();
+  }
+
   @Get(':id')
   @ApiOperation({ 
     summary: 'Get event by ID', 

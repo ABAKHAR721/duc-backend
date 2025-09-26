@@ -25,10 +25,23 @@ export class EventsService {
   findAllHeader(): Promise<Event[]> {
     return this.prisma.event.findMany({
       where: {
-        eventType: 'Header',
+        eventType: 'Promo',
+        status: 'Active',
       },
       orderBy: {
-        startDate: 'asc',
+        startDate: 'desc',
+      },
+    });
+  }
+
+  findPromoEvents(): Promise<Event[]> {
+    return this.prisma.event.findMany({
+      where: {
+        eventType: 'promo',
+        status: 'En cours',
+      },
+      orderBy: {
+        startDate: 'desc',
       },
     });
   }

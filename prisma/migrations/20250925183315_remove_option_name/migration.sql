@@ -7,4 +7,4 @@
 */
 -- AlterTable
 ALTER TABLE "public"."item_options" DROP COLUMN "option_name",
-ALTER COLUMN "option_type" SET NOT NULL;
+ALTER COLUMN "option_type" SET NOT NULL; 

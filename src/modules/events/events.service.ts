@@ -26,7 +26,7 @@ export class EventsService {
   findAllHeader(): Promise<Event[]> {
     return this.prisma.event.findMany({
       where: {
-        eventType: 'Promo',
+        eventType: 'Header',
         status: 'Active',
       },
       orderBy: {
@@ -35,7 +35,7 @@ export class EventsService {
     });
   }
 
-  findPromoEvents(): Promise<Event[]> {
+  findPromoEvents(): Promise<Event[]> { 
     return this.prisma.event.findMany({
       where: {
         eventType: 'promo',
@@ -45,7 +45,7 @@ export class EventsService {
         startDate: 'desc',
       },
     });
-  }
+  } 
 
   async findOne(id: string): Promise<Event> {
     const event = await this.prisma.event.findUnique({

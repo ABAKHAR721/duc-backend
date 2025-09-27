@@ -9,6 +9,7 @@ export class EventsService {
   constructor(private prisma: PrismaService) {}
 
   create(createEventDto: CreateEventDto): Promise<Event> {
+    console.log('Creating event with data:', JSON.stringify(createEventDto, null, 2));
     return this.prisma.event.create({
       data: createEventDto,
     });

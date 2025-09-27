@@ -12,6 +12,7 @@ import { ItemsModule } from './modules/items/items.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SeederModule } from './modules/seeder/seeder.module';
+import { SecurityModule } from './common/security.module';
 @Module({
   imports: [
     // 1. Module de configuration pour les variables d'environnement (.env)
@@ -23,7 +24,10 @@ import { SeederModule } from './modules/seeder/seeder.module';
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
 
-    // 3. Modules de fonctionnalités de l'application
+    // 3. Security Module
+    SecurityModule,
+
+    // 4. Modules de fonctionnalités de l'application
     BusinessModule,
     UsersModule,
     EventsModule,

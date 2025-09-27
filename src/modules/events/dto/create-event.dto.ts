@@ -23,11 +23,13 @@ export class CreateEventDto {
   @ApiPropertyOptional({ description: 'Event start date', example: '2024-06-01T10:00:00Z' })
   @IsDateString()
   @IsOptional()
+  @Transform(({ value }) => value === null ? undefined : value)
   startDate?: Date; 
 
   @ApiPropertyOptional({ description: 'Event end date', example: '2024-06-01T18:00:00Z' })
   @IsDateString()
   @IsOptional()
+  @Transform(({ value }) => value === null ? undefined : value)
   endDate?: Date;
 
   @ApiPropertyOptional({ description: 'Event status', example: 'Active', enum: ['Active', 'Inactive', 'Cancelled'] })

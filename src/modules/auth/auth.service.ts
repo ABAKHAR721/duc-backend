@@ -41,7 +41,7 @@ export class AuthService {
     return { access_token: accessToken, refresh_token: refreshToken };
   }
 
-  async refreshToken(refreshToken: string): Promise<{ access_token: string }> {
+  async refreshToken(refreshToken: string): Promise<{ access_token: string; refresh_token: string }> {
     try {
       const payload = this.jwtService.verify(refreshToken);
       const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
@@ -50,8 +50,22 @@ export class AuthService {
         throw new Error('Invalid refresh token');
       }
 
+      // Generate new tokens (token rotation)
       const newPayload = { name: user.name, email: user.email, sub: user.id, role: user.role };
-      return { access_token: this.jwtService.sign(newPayload, { expiresIn: '15m' }) };
+      const newAccessToken = this.jwtService.sign(newPayload, { expiresIn: '15m' });
+      const newRefreshToken = this.jwtService.sign({ sub: user.id }, { expiresIn: '7d' });
+      
+      // Update refresh token in database
+      const hashedNewRefreshToken = await bcrypt.hash(newRefreshToken, 10);
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { refreshToken: hashedNewRefreshToken }
+      });
+
+      return { 
+        access_token: newAccessToken, 
+        refresh_token: newRefreshToken 
+      };
     } catch {
       throw new Error('Invalid refresh token');
     }

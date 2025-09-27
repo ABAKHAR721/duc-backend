@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nes
 import { AuthService } from './auth.service';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { SkipCsrf } from '../../common/decorators/skip-csrf.decorator';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -10,6 +11,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @SkipCsrf()
   @ApiOperation({ summary: 'User login' })
   @ApiBody({ type: AuthLoginDto })
   @ApiResponse({ status: 200, description: 'Login successful' })
@@ -23,6 +25,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @SkipCsrf()
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })

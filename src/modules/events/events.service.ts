@@ -27,7 +27,7 @@ export class EventsService {
     return this.prisma.event.findMany({
       where: {
         eventType: 'Header',
-        status: 'Active',
+        status: 'En cours',
       },
       orderBy: {
         startDate: 'desc',

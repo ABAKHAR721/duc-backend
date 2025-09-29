@@ -20,10 +20,18 @@ export class CategoriesService {
   /**
    * Retourne toutes les catégories avec le nombre d'articles.
    */
-  findAll(): Promise<Category[]> {
-    return this.prisma.category.findMany({
+  async findAll(): Promise<any[]> {
+    const categories = await this.prisma.category.findMany({
       include: {
-        children: true,
+        children: {
+          include: {
+            _count: {
+              select: {
+                items: true
+              }
+            }
+          }
+        },
         parent: true,
         _count: {
           select: {
@@ -34,6 +42,27 @@ export class CategoriesService {
       orderBy: {
         displayOrder: 'asc',
       },
+    });
+
+    // Calculate total item count for parent categories (direct items + subcategory items)
+    return categories.map(category => {
+      let totalItemCount = category._count.items; // Direct items
+
+      // If this is a parent category, add items from all subcategories
+      if (category.children && category.children.length > 0) {
+        const subcategoryItemCount = category.children.reduce((sum, child) => {
+          return sum + (child._count?.items || 0);
+        }, 0);
+        totalItemCount += subcategoryItemCount;
+      }
+
+      return {
+        ...category,
+        _count: {
+          ...category._count,
+          items: totalItemCount
+        }
+      };
     });
   }
 
